@@ -8,11 +8,17 @@ import Modal from "./Modal";
 import AdoptedPetContext from "./AdoptedPetContext";
 
 const Details = () => {
+  const { id } = useParams();
+
+  if (!id) {
+    throw new Error(
+      "why did you not gime an id?!! I wanted an id. I have no id."
+    );
+  }
   const [showModal, setShowModal] = useState(false);
   const navigate = useNavigate();
-  // eslint-disable-next-line no-unused-vars
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_, setAdoptedPet] = useContext(AdoptedPetContext);
-  const { id } = useParams();
   const results = useQuery(["details", id], fetchPet);
 
   if (results.isLoading) {
@@ -23,7 +29,10 @@ const Details = () => {
     );
   }
 
-  const pet = results.data.pets[0];
+  const pet = results?.data?.pets[0];
+  if (!pet) {
+    throw new Error("no pet lol");
+  }
 
   return (
     <div className="details">
