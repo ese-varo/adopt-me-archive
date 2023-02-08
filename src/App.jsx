@@ -1,17 +1,18 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { useState } from "react";
-import { createRoot } from "react-dom/client";
-import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
+import { lazy, Suspense, useState } from "react";
+import { Routes, Route, Link } from "react-router-dom";
 import AdoptedPetContext from "./AdoptedPetContext";
-import Details from "./Details";
-import Monkey from "./Monkey";
-import SearchParams from "./SearchParams";
+
+const Details = lazy(() => import("./Details"));
+const SearchParams = lazy(() => import("./SearchParams"));
+const Monkey = lazy(() => import("./Monkey"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: Infinity,
       cacheTime: Infinity,
+      suspense: true,
     },
   },
 });
@@ -19,8 +20,14 @@ const queryClient = new QueryClient({
 const App = () => {
   const adoptedPet = useState(null);
   return (
-    <BrowserRouter>
-      <QueryClientProvider client={queryClient}>
+    <QueryClientProvider client={queryClient}>
+      <Suspense
+        fallback={
+          <div className="loading-pane">
+            <h2 className="loader">:dog:</h2>
+          </div>
+        }
+      >
         <AdoptedPetContext.Provider value={adoptedPet}>
           <header>
             <Link to="/">Adopt Me!</Link>
@@ -31,11 +38,9 @@ const App = () => {
             <Route path="/monkey" element={<Monkey />} />
           </Routes>
         </AdoptedPetContext.Provider>
-      </QueryClientProvider>
-    </BrowserRouter>
+      </Suspense>
+    </QueryClientProvider>
   );
 };
 
-const container = document.getElementById("root");
-const root = createRoot(container);
-root.render(<App />);
+export default App;
